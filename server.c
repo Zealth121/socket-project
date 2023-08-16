@@ -47,41 +47,42 @@ int main(){
         exit(EXIT_FAILURE);
     }
     printf("Done with binding\n");
+    while(1){
+        //listen for clients
+        if(listen(socket_desc, 4) < 0){
+            perror("Error while listening\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Listening for incoming connections...\n");
 
-    //listen for clients
-    if(listen(socket_desc, 4) < 0){
-        perror("Error while listening\n");
-        exit(EXIT_FAILURE);
+        //Accept incoming connection
+        client_size = sizeof(client_addr);
+        client_sock = accept(socket_desc, (struct sockaddr*) &client_addr, &client_size);
+
+        if(client_sock < 0){
+            perror("Can't accept\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Client connected at IP: %i and port: %i\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+        //Recieve clients message
+        if(recv(client_sock, client_message, sizeof(client_message), 0) < 0){
+            perror("Couldn't recieve\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Msg from client: %s\n", client_message);
+
+        //Respond to client
+        strcpy(server_message, "This is the server's message.");
+        if(send(client_sock, server_message, sizeof(server_message), 0) < 0){
+            printf("Couldn't send message\n");
+        }
+        printf("Server message sent\n");
     }
-    printf("Listening for incoming connections...\n");
 
-    //Accept incoming connection
-    client_size = sizeof(client_addr);
-    client_sock = accept(socket_desc, (struct sockaddr*) &client_addr, &client_size);
-
-    if(client_sock < 0){
-        perror("Can't accept\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Client connected at IP: %i and port: %i\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-
-    //Recieve clients message
-    if(recv(client_sock, client_message, sizeof(client_message), 0) < 0){
-        perror("Couldn't recieve\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Msg from client: %s\n", client_message);
-
-    //Respond to client
-    strcpy(server_message, "This is the server's message.");
-    if(send(client_sock, server_message, sizeof(server_message), 0) < 0){
-        printf("Couldn't send message\n");
-    }
-    printf("Server message sent\n");
-
-    //Closing the sockets
-    close(client_sock);
-    close(socket_desc);
+        //Closing the sockets
+        close(client_sock);
+        close(socket_desc);
 
     return 0;
 }
