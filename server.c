@@ -49,7 +49,7 @@ int main(){
     printf("Done with binding\n");
     while(1){
         //listen for clients
-        if(listen(socket_desc, 4) < 0){
+        if(listen(socket_desc, 1) < 0){
             perror("Error while listening\n");
             exit(EXIT_FAILURE);
         }
